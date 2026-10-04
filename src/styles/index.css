@@ -1,0 +1,961 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   APNA STORE — GLOBAL DESIGN + MOTION FOUNDATION
+   One token set, one motion system, one visual DNA for every page.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* ---- Surface / depth scale (deep cinematic -> raised surface) ---- */
+    --as-ink-900: #08080a; /* page floor */
+    --as-ink-800: #0d0e11; /* default page background */
+    --as-ink-700: #141519; /* raised surface / cards */
+    --as-ink-600: #1b1d22; /* hover surface */
+    --as-ink-500: #24262c; /* active / selected surface */
+
+    /* ---- Foreground ---- */
+    --as-bone: #f4f2ee; /* primary text (soft white, never pure #fff) */
+    --as-bone-muted: #a9a7a2; /* secondary text */
+    --as-bone-dim: #6e6d6a; /* tertiary / meta */
+
+    /* ---- Restrained accent (used sparingly: focus, sale, small marks) ---- */
+    --as-accent: #c4674a;
+    --as-accent-soft: rgba(196, 103, 74, 0.16);
+
+    /* ---- Lines ---- */
+    --as-line: rgba(244, 242, 238, 0.09);
+    --as-line-strong: rgba(244, 242, 238, 0.2);
+
+    /* ---- Motion durations (§9) ---- */
+    --motion-fast: 180ms; /* microinteraction */
+    --motion-normal: 340ms; /* normal UI */
+    --motion-slow: 760ms; /* editorial reveal */
+    --motion-cinematic: 1150ms; /* cinematic transition */
+    --motion-scene: 1400ms; /* large scene transition */
+
+    /* ---- Easing ---- */
+    --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-sharp: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ---- Layout rhythm (§88) ---- */
+    --shell-pad: clamp(1.125rem, 4vw, 4.5rem);
+    --section-y: clamp(4.5rem, 10vw, 9.5rem);
+    --header-h: 68px;
+
+    /* true viewport height, kept in sync by JS for mobile Safari (§86) */
+    --vh: 1vh;
+    --app-vh: 100vh;
+  }
+
+  * {
+    @apply border-line;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* never let a decorative layer create a sideways scrollbar (§8) */
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink-800 text-bone font-sans antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+    min-height: var(--app-vh);
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Scroll lock applied by useBodyScrollLock — keeps position, no layout jump */
+  body[data-scroll-locked='true'] {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible, consistent focus for keyboard users (§72) */
+  :focus-visible {
+    outline: 2px solid var(--as-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  ::selection {
+    background: var(--as-accent);
+    color: #fff;
+  }
+
+  img,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Media never renders a surprise white box while loading */
+  img {
+    background-color: var(--as-ink-700);
+    color: transparent;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--as-bone-dim);
+  }
+
+  /* Autofill must not punch a white rectangle into a dark form (§109) */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--as-bone);
+    -webkit-box-shadow: 0 0 0 1000px var(--as-ink-700) inset;
+    caret-color: var(--as-bone);
+    transition: background-color 9999s ease-out 0s;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--as-ink-900);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--as-ink-500);
+    border-radius: 99px;
+    border: 3px solid var(--as-ink-900);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #34373e;
+  }
+}
+
+/* ==========================================================================
+   LAYOUT PRIMITIVES
+   ========================================================================== */
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: var(--as-shell, 96rem);
+    margin-inline: auto;
+    padding-inline: var(--shell-pad);
+  }
+
+  .shell-wide {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: var(--shell-pad);
+  }
+
+  .section-y {
+    padding-block: var(--section-y);
+  }
+
+  /* ---- Fluid editorial type scale (§7) — never clips, never too small ---- */
+  .t-display {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: clamp(2.75rem, 10.5vw, 9rem);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    font-weight: 400;
+  }
+  .t-h1 {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: clamp(2.25rem, 6.4vw, 5rem);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    font-weight: 400;
+  }
+  .t-h2 {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: clamp(1.75rem, 4.4vw, 3.25rem);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+  }
+  .t-h3 {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: clamp(1.35rem, 2.6vw, 2rem);
+    line-height: 1.14;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+  .t-lead {
+    font-size: clamp(1rem, 1.35vw, 1.1875rem);
+    line-height: 1.6;
+    color: var(--as-bone-muted);
+    letter-spacing: -0.005em;
+  }
+  .t-body {
+    font-size: 0.9375rem;
+    line-height: 1.68;
+    color: var(--as-bone-muted);
+  }
+  /* Eyebrow / label — minimum 11px so it stays legible on phones */
+  .t-eyebrow {
+    font-size: clamp(0.6875rem, 0.85vw, 0.75rem);
+    line-height: 1.2;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--as-bone-dim);
+  }
+  .t-meta {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--as-bone-dim);
+  }
+
+  /* ==========================================================================
+     LIQUID GLASS (§48) — used only on floating / overlay surfaces
+     ========================================================================== */
+  .liquid-glass {
+    position: relative;
+    overflow: hidden;
+    background: rgba(20, 21, 25, 0.55);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    border: none;
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.08),
+      0 24px 60px -28px rgba(0, 0, 0, 0.85);
+  }
+
+  /* The hairline bevel that sells the "liquid" edge */
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.2px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0.12) 22%,
+      rgba(255, 255, 255, 0) 42%,
+      rgba(255, 255, 255, 0) 60%,
+      rgba(255, 255, 255, 0.1) 82%,
+      rgba(255, 255, 255, 0.34) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Scrolled header surface, with an opaque fallback where backdrop-filter
+     is unavailable (older Safari) so the nav never turns unreadable */
+  .header-solid {
+    background: rgba(8, 8, 10, 0.78);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+  }
+
+  /* Lighter variant for inline chips/controls sitting on imagery */
+  .glass-soft {
+    background: rgba(244, 242, 238, 0.06);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Safari < 16 and anything without backdrop-filter gets an opaque fallback */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .liquid-glass {
+      background: rgba(13, 14, 17, 0.94);
+    }
+    .glass-soft {
+      background: rgba(27, 29, 34, 0.94);
+    }
+    .header-solid {
+      background: rgba(8, 8, 10, 0.97);
+    }
+  }
+
+  /* ==========================================================================
+     SURFACES
+     ========================================================================== */
+  .surface {
+    background: var(--as-ink-700);
+    border: 1px solid var(--as-line);
+  }
+  .surface-raised {
+    background: linear-gradient(180deg, var(--as-ink-700), var(--as-ink-800));
+    border: 1px solid var(--as-line);
+  }
+  .hairline-t {
+    border-top: 1px solid var(--as-line);
+  }
+  .hairline-b {
+    border-bottom: 1px solid var(--as-line);
+  }
+
+  /* ==========================================================================
+     BUTTON SYSTEM (§49)
+     Every state: default / hover / focus / active / disabled / loading
+     ========================================================================== */
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    /* 44px min touch target on every button, everywhere (§13, §80) */
+    min-height: 44px;
+    padding: 0 1.75rem;
+    transition:
+      background-color var(--motion-fast) var(--ease-premium),
+      color var(--motion-fast) var(--ease-premium),
+      border-color var(--motion-fast) var(--ease-premium),
+      transform var(--motion-fast) var(--ease-premium),
+      opacity var(--motion-fast) var(--ease-premium);
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  /* Arrow nudge on hover */
+  .btn .btn-arrow {
+    transition: transform var(--motion-normal) var(--ease-premium);
+  }
+  .btn:hover .btn-arrow {
+    transform: translateX(4px);
+  }
+
+  .btn-primary {
+    background: var(--as-bone);
+    color: var(--as-ink-900);
+    border: 1px solid var(--as-bone);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: #fff;
+    transform: scale(1.025);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--as-bone);
+    border: 1px solid var(--as-line-strong);
+  }
+  .btn-outline:hover:not(:disabled) {
+    border-color: var(--as-bone);
+    background: rgba(244, 242, 238, 0.06);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--as-bone-muted);
+    border: 1px solid transparent;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    color: var(--as-bone);
+    background: rgba(244, 242, 238, 0.06);
+  }
+
+  .btn-accent {
+    background: var(--as-accent);
+    color: #fff;
+    border: 1px solid var(--as-accent);
+  }
+  .btn-accent:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: scale(1.025);
+  }
+
+  .btn-sm {
+    min-height: 38px;
+    padding: 0 1.125rem;
+    font-size: 0.6875rem;
+  }
+  .btn-lg {
+    min-height: 54px;
+    padding: 0 2.25rem;
+    font-size: 0.875rem;
+  }
+  .btn-block {
+    width: 100%;
+  }
+
+  /* Icon-only control — still 44px, still labelled via aria-label */
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    color: var(--as-bone-muted);
+    transition:
+      color var(--motion-fast) var(--ease-premium),
+      background-color var(--motion-fast) var(--ease-premium),
+      transform var(--motion-fast) var(--ease-premium);
+  }
+  .icon-btn:hover {
+    color: var(--as-bone);
+    background: rgba(244, 242, 238, 0.08);
+  }
+  .icon-btn:active {
+    transform: scale(0.92);
+  }
+
+  /* ---- Underline link (nav + editorial links) ---- */
+  .link-underline {
+    position: relative;
+    display: inline-block;
+  }
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--motion-normal) var(--ease-premium);
+  }
+  .link-underline:hover::after,
+  .link-underline[data-active='true']::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  /* ---- Form fields ---- */
+  .field {
+    width: 100%;
+    min-height: 48px;
+    background: var(--as-ink-700);
+    border: 1px solid var(--as-line);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    color: var(--as-bone);
+    transition:
+      border-color var(--motion-fast) var(--ease-premium),
+      background-color var(--motion-fast) var(--ease-premium);
+  }
+  .field:hover {
+    border-color: var(--as-line-strong);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--as-bone-muted);
+    background: var(--as-ink-600);
+  }
+  .field[aria-invalid='true'] {
+    border-color: var(--as-accent);
+  }
+
+  /* ---- Tag / chip ---- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 36px;
+    padding: 0 0.875rem;
+    border-radius: 999px;
+    border: 1px solid var(--as-line);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: var(--as-bone-muted);
+    transition: all var(--motion-fast) var(--ease-premium);
+  }
+  .chip:hover {
+    border-color: var(--as-line-strong);
+    color: var(--as-bone);
+  }
+  .chip[data-selected='true'] {
+    background: var(--as-bone);
+    border-color: var(--as-bone);
+    color: var(--as-ink-900);
+  }
+
+  /* ==========================================================================
+     ATMOSPHERE (§78, §79)
+     ========================================================================== */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.028;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Readability overlay for text over imagery/video (§73) */
+  .scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .scrim-bottom {
+    background: linear-gradient(
+      to top,
+      rgba(8, 8, 10, 0.92) 0%,
+      rgba(8, 8, 10, 0.6) 32%,
+      rgba(8, 8, 10, 0.15) 62%,
+      rgba(8, 8, 10, 0.3) 100%
+    );
+  }
+  .scrim-card {
+    background: linear-gradient(
+      to top,
+      rgba(8, 8, 10, 0.85) 0%,
+      rgba(8, 8, 10, 0.25) 45%,
+      rgba(8, 8, 10, 0.05) 100%
+    );
+  }
+
+  /* Soft seam between cinematic scenes — no abrupt theme jumps (§93, §94) */
+  .scene-seam {
+    height: clamp(5rem, 12vw, 11rem);
+    background: linear-gradient(to bottom, var(--as-ink-900), var(--as-ink-800));
+    pointer-events: none;
+  }
+
+  /* ==========================================================================
+     LOADING (§47)
+     ========================================================================== */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--as-ink-700);
+    border-radius: 6px;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(244, 242, 238, 0.055),
+      transparent
+    );
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* ==========================================================================
+     MARQUEE (§41)
+     ========================================================================== */
+  .marquee {
+    display: flex;
+    overflow: hidden;
+    user-select: none;
+    gap: var(--marquee-gap, 3rem);
+  }
+  .marquee__track {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--marquee-gap, 3rem);
+    min-width: 100%;
+    animation: marquee var(--marquee-duration, 42s) linear infinite;
+  }
+  .marquee:hover .marquee__track {
+    animation-play-state: paused;
+  }
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--marquee-gap, 3rem)));
+    }
+  }
+}
+
+/* ==========================================================================
+   MOTION SYSTEM (§105)
+   Reveals are driven by [data-reveal] + IntersectionObserver (useScrollReveal).
+   Elements start hidden ONLY when JS is active, so content is never lost.
+   ========================================================================== */
+@layer utilities {
+  @keyframes fade-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 24px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes blur-sharp {
+    from {
+      opacity: 0;
+      filter: blur(12px);
+      transform: translate3d(0, 14px, 0);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  @keyframes clip-reveal {
+    from {
+      clip-path: inset(0 0 100% 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+  @keyframes line-rise {
+    from {
+      transform: translate3d(0, 110%, 0);
+    }
+    to {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  @keyframes image-settle {
+    from {
+      opacity: 0;
+      transform: scale(1.08);
+      clip-path: inset(0 0 12% 0);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+      clip-path: inset(0 0 0 0);
+    }
+  }
+  @keyframes drawer-in-right {
+    from {
+      transform: translate3d(100%, 0, 0);
+    }
+    to {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  /* Hero drift — a 3% scale over 9s reads as depth, not as zoom */
+  @keyframes hero-drift {
+    from {
+      transform: scale(1.03);
+    }
+    to {
+      transform: scale(1.07);
+    }
+  }
+  @keyframes nudge {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(4px);
+    }
+  }
+  @keyframes page-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 10px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  @keyframes drawer-in-left {
+    from {
+      transform: translate3d(-100%, 0, 0);
+    }
+    to {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  @keyframes sheet-up {
+    from {
+      transform: translate3d(0, 100%, 0);
+    }
+    to {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 16px, 0) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.55;
+    }
+    100% {
+      transform: scale(2.1);
+      opacity: 0;
+    }
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes float-slow {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+    50% {
+      transform: translate3d(0, -22px, 0) rotate(3deg);
+    }
+  }
+  @keyframes morph-blob {
+    0%,
+    100% {
+      border-radius: 58% 42% 46% 54% / 52% 48% 52% 48%;
+    }
+    33% {
+      border-radius: 42% 58% 62% 38% / 44% 60% 40% 56%;
+    }
+    66% {
+      border-radius: 50% 50% 38% 62% / 62% 38% 62% 38%;
+    }
+  }
+
+  /* ---- Reveal states ---- */
+  [data-reveal] {
+    opacity: 0;
+    will-change: opacity, transform;
+  }
+  [data-reveal='rise'] {
+    transform: translate3d(0, 26px, 0);
+  }
+  [data-reveal='blur'] {
+    filter: blur(10px);
+    transform: translate3d(0, 14px, 0);
+  }
+  [data-reveal='scale'] {
+    transform: scale(0.965);
+  }
+  [data-reveal='clip'] {
+    opacity: 1;
+    clip-path: inset(0 0 100% 0);
+  }
+  [data-reveal='image'] {
+    transform: scale(1.06);
+    clip-path: inset(0 0 10% 0);
+  }
+
+  [data-reveal][data-revealed='true'] {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+    clip-path: inset(0 0 0 0);
+    transition:
+      opacity var(--motion-slow) var(--ease-cinematic),
+      transform var(--motion-slow) var(--ease-cinematic),
+      filter var(--motion-slow) var(--ease-cinematic),
+      clip-path var(--motion-cinematic) var(--ease-cinematic);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: auto;
+  }
+
+  /* ---- Entrance helpers (above-the-fold, no observer needed) ---- */
+  .anim-rise {
+    animation: fade-rise var(--motion-slow) var(--ease-cinematic) both;
+  }
+  .anim-fade {
+    animation: fade-in var(--motion-normal) var(--ease-premium) both;
+  }
+  .anim-scale {
+    animation: scale-in var(--motion-normal) var(--ease-premium) both;
+  }
+  .anim-blur {
+    animation: blur-sharp var(--motion-cinematic) var(--ease-cinematic) both;
+  }
+  .anim-image {
+    animation: image-settle var(--motion-scene) var(--ease-cinematic) both;
+  }
+
+  /* Masked line reveal (§19, §95) */
+  .line-mask {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.08em;
+    margin-bottom: -0.08em;
+  }
+  .line-mask > span {
+    display: block;
+    animation: line-rise var(--motion-cinematic) var(--ease-cinematic) both;
+  }
+
+  /* ---- Hover systems (§52) ---- */
+  .hover-zoom img,
+  .hover-zoom .zoom-target {
+    transition: transform var(--motion-cinematic) var(--ease-cinematic);
+    will-change: transform;
+  }
+  .hover-zoom:hover img,
+  .hover-zoom:hover .zoom-target {
+    transform: scale(1.045);
+  }
+
+  .hover-lift {
+    transition: transform var(--motion-normal) var(--ease-premium);
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px);
+  }
+
+  /* ---- Utility ---- */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .snap-x-rail {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+  .snap-item {
+    scroll-snap-align: start;
+  }
+
+  /* Dynamic viewport height that survives mobile Safari's toolbars (§86) */
+  .h-app {
+    height: var(--app-vh);
+  }
+  .min-h-app {
+    min-height: var(--app-vh);
+  }
+
+  .spin {
+    animation: spin 0.9s linear infinite;
+  }
+}
+
+/* ==========================================================================
+   REDUCED MOTION (§11) — one centralised switch.
+   Content stays visible and usable; only the movement goes away.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Critical: never leave revealed-on-scroll content stuck at opacity 0 */
+  [data-reveal],
+  [data-reveal][data-revealed='true'] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
+  }
+
+  .marquee__track {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .hover-zoom:hover img,
+  .hover-zoom:hover .zoom-target,
+  .hover-lift:hover {
+    transform: none !important;
+  }
+
+  .grain {
+    display: none;
+  }
+}
+
+/* App-level override toggled from the UI/system preference */
+html[data-reduced-motion='true'] [data-reveal] {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  clip-path: none !important;
+}
+html[data-reduced-motion='true'] .marquee__track {
+  animation: none !important;
+}
