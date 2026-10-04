@@ -9,7 +9,7 @@ if (!container) throw new Error('Root element #root was not found');
 
 createRoot(container).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/Store">
       <App />
     </BrowserRouter>
   </StrictMode>,
